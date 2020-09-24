@@ -67,7 +67,7 @@ LightFactory::LightFactory(const HueCommandAPI& commands, std::chrono::steady_cl
       extendedColorTemperature(std::make_shared<ExtendedColorTemperatureStrategy>()),
       simpleColorHue(std::make_shared<SimpleColorHueStrategy>()),
       extendedColorHue(std::make_shared<ExtendedColorHueStrategy>())
-{}
+{ }
 
 Light LightFactory::createLight(const nlohmann::json& lightState, int id)
 {
@@ -81,7 +81,7 @@ Light LightFactory::createLight(const nlohmann::json& lightState, int id)
         light.colorType = ColorType::NONE;
         return light;
     }
-    else if (type == "dimmable light" || type =="dimmable plug-in unit")
+    else if (type == "dimmable light" || type == "dimmable plug-in unit")
     {
         Light light(id, commands, simpleBrightness, nullptr, nullptr, refreshDuration);
         light.colorType = ColorType::NONE;
@@ -131,7 +131,7 @@ ColorType LightFactory::getColorType(const nlohmann::json& lightState, bool hasC
         else
         {
             // Only other type is "Other" which does not have an enum value
-            return ColorType::UNDEFINED;
+            return hasCt ? ColorType::GAMUT_OTHER_TEMPERATURE : ColorType::GAMUT_OTHER;
         }
     }
     else
@@ -150,8 +150,13 @@ ColorType LightFactory::getColorType(const nlohmann::json& lightState, bool hasC
         {
             return hasCt ? ColorType::GAMUT_C_TEMPERATURE : ColorType::GAMUT_C;
         }
-        std::cerr << "Could not determine Light color type:" << modelid << "!\n";
-        throw HueException(CURRENT_FILE_INFO, "Could not determine Light color type!");
+        else
+        {
+            std::cerr << "Warning: Could not determine Light color type:" << modelid
+                      << "!\n"
+                         "Results may not be correct.\n";
+            return ColorType::UNDEFINED;
+        }
     }
 }
 } // namespace hueplusplus

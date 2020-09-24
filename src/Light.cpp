@@ -75,7 +75,9 @@ ColorGamut Light::getColorGamut() const
     case ColorType::GAMUT_C:
     case ColorType::GAMUT_C_TEMPERATURE:
         return gamut::gamutC;
-    default: {
+    case ColorType::UNDEFINED:
+        return gamut::maxGamut;
+    default: { // GAMUT_OTHER, GAMUT_OTHER_TEMPERATURE
         const nlohmann::json& capabilitiesGamut
             = utils::safeGetMember(state.getValue(), "capabilities", "control", "colorgamut");
         if (capabilitiesGamut.is_array() && capabilitiesGamut.size() == 3)
@@ -122,6 +124,5 @@ Light::Light(int id, const HueCommandAPI& commands, std::shared_ptr<const Bright
       brightnessStrategy(std::move(brightnessStrategy)),
       colorTemperatureStrategy(std::move(colorTempStrategy)),
       colorHueStrategy(std::move(colorHueStrategy))
-{
-}
+{ }
 } // namespace hueplusplus
